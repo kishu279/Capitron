@@ -49,13 +49,13 @@ async function main() {
 
     websocketClient.onmessage = async (message) => {
       // handle incoming messages
-      const data = JSON.parse(message.data);
+      const data = JSON.parse(message.data.toString());
       const { stream, data: ticker }: BinanceBookTicker = data;
 
       console.log("Received message: ", data);
 
       // push the data to redis pub sub
-      await redisClient.publish(stream, JSON.stringify(ticker));
+      await redisClient.publish(stream.toString(), JSON.stringify(ticker));
     };
 
     websocketClient.onclose = () => {

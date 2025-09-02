@@ -3,14 +3,13 @@
     // Environment setup & latest features
     "lib": ["ESNext"],
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "Node16",
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "allowJs": true,
 
     // Bundler mode
-    // Bundler mode
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "outDir": "dist",
 
     // Best practices
@@ -24,5 +23,7 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "esModuleInterop": true
-  }
+  },
+  "include": ["src"],
+  "references": [{ "path": "../../packages/config" }]
 }

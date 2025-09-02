@@ -7,6 +7,7 @@
 
 import { createClient } from "redis";
 import WebSocket from "ws";
+import { binanceService } from "@repo/config";
 
 // REDIS -> PUB SUB
 const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
@@ -27,7 +28,7 @@ interface BinanceBookTicker {
 
 // BINANCE -> api
 const binanceBaseUrl = "wss://stream.binance.com:443/stream?streams="; // WEBSOCKET base url
-const service = ["btcusdt", "ethusdt", "bnbusdt"]; // service
+// const service = ["btcusdt", "ethusdt", "bnbusdt"]; // service
 
 async function main() {
   try {
@@ -36,7 +37,7 @@ async function main() {
     console.log("Redis Client connected");
 
     // link
-    const paramsLink = service
+    const paramsLink = binanceService
       .map((service) => `${service}@bookTicker`)
       .join("/");
     const fullLink = `${binanceBaseUrl}${paramsLink}`;
@@ -65,9 +66,6 @@ async function main() {
     websocketClient.onerror = (error) => {
       console.error("Websocket error:", error);
     };
-
-    // push the data ro redis pub sub
-    //
   } catch (error) {
     console.error("Error connecting to Redis:", error);
     const timer = setTimeout(() => {

@@ -6,7 +6,7 @@
 // 4. Fetch by USER :
 // 5min, etc, fetch from the database and do operation
 
-import { getBinanceLink } from "@repo/config";
+import { getStream } from "@repo/config";
 
 import { WebSocketServer } from "ws";
 import { createServer } from "http";
@@ -28,6 +28,12 @@ async function main() {
   // create the redis client
   await redisClient.connect();
   console.log("Redis Client connected");
+
+  console.log(getStream());
+
+  await redisClient.subscribe(getStream(), (message, channel) => {
+    console.log(`Received message from Redis on channel ${channel}:`, message);
+  });
 
   // get the subscribed element from the redis
   // the stream

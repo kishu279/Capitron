@@ -7,7 +7,7 @@
 
 import { createClient } from "redis";
 import WebSocket from "ws";
-import { binanceService } from "@repo/config";
+import { binanceService, getBinanceLink } from "@repo/config";
 
 // REDIS -> PUB SUB
 const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
@@ -37,9 +37,7 @@ async function main() {
     console.log("Redis Client connected");
 
     // link
-    const paramsLink = binanceService
-      .map((service) => `${service}@bookTicker`)
-      .join("/");
+    const paramsLink = getBinanceLink();
     const fullLink = `${binanceBaseUrl}${paramsLink}`;
 
     // polling the data from the web socket server

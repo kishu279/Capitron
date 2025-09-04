@@ -32,7 +32,7 @@ async function main() {
   console.log(getStream());
 
   await redisClient.subscribe(getStream(), (message, channel) => {
-    console.log(`Received message from Redis on channel ${channel}:`, message);
+    // console.log(`Received message from Redis on channel ${channel}:`, message);
   });
 
   // get the subscribed element from the redis
@@ -48,9 +48,22 @@ app.get("/", (req, res) => {
 
 wss.on("connection", (ws) => {
   console.log("New client connected");
+  ws.send("Welcome new client!");
 
-  // more operation
+  // more event operation
   // ...
+
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
+
+  ws.on("error", (error) => {
+    console.error("Error:", error);
+  });
+
+  ws.on("message", (message: Blob | ArrayBuffer | Buffer | ArrayBufferLike) => {
+    console.log("Received message from client:", message.toString());
+  });
 });
 
 httpServer.listen(PORT, () => {

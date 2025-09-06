@@ -26,6 +26,21 @@ interface BinanceBookTicker {
   };
 }
 
+interface BinanceTrade {
+  stream: string;
+  data: {
+    e: "trade";
+    E: number;
+    s: "string";
+    t: number;
+    p: string;
+    q: string;
+    T: number;
+    m: boolean;
+    M: boolean;
+  };
+}
+
 // BINANCE -> api
 const binanceBaseUrl = "wss://stream.binance.com:443/stream?streams="; // WEBSOCKET base url
 // const service = ["btcusdt", "ethusdt", "bnbusdt"]; // service
@@ -49,12 +64,12 @@ async function main() {
     websocketClient.onmessage = async (message) => {
       // handle incoming messages
       const data = JSON.parse(message.data.toString());
-      const { stream, data: ticker }: BinanceBookTicker = data;
+      const { stream, data: trade }: BinanceTrade = data;
 
       console.log("Received message: ", data);
 
       // push the data to redis pub sub
-      await redisClient.publish(stream.toString(), JSON.stringify(ticker));
+      await redisClient.publish(stream.toString(), JSON.stringify(trade));
     };
 
     websocketClient.onclose = () => {

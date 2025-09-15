@@ -8,6 +8,7 @@
 import { createClient } from "redis";
 import WebSocket from "ws";
 import { binanceService, getBinanceLink } from "@repo/config";
+import { createTable } from "@repo/lib";
 
 // REDIS -> PUB SUB
 const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
@@ -31,7 +32,7 @@ interface BinanceTrade {
   data: {
     e: "trade";
     E: number;
-    s: "string";
+    s: string;
     t: number;
     p: string;
     q: string;
@@ -51,6 +52,9 @@ async function main() {
     await redisClient.connect();
     console.log("Redis Client connected");
 
+    // create the table
+    // await createTable();
+
     // link
     const paramsLink = getBinanceLink();
     const fullLink = `${binanceBaseUrl}${paramsLink}`;
@@ -66,7 +70,10 @@ async function main() {
       const data = JSON.parse(message.data.toString());
       const { stream, data: trade }: BinanceTrade = data;
 
-      console.log("Received message: ", data);
+      // console.log("Received message: ", data);
+
+      // insert the query to the database
+      
 
       // push the data to redis pub sub
       await redisClient.publish(stream.toString(), JSON.stringify(trade));
@@ -81,13 +88,12 @@ async function main() {
     };
   } catch (error) {
     console.error("Error connecting to Redis:", error);
-    const timer = setTimeout(() => {
+    await redisClient.quit();
+
+    // Retry connection after 5 seconds
+    setTimeout(() => {
       main();
     }, 5000);
-
-    return () => {
-      clearTimeout(timer);
-    };
   }
 }
 

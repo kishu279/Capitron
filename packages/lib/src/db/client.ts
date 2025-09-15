@@ -1,10 +1,10 @@
 import client from "pg";
 
-const dbClient = new client.Client({
+const dbClient = new client.Pool({
   host: "localhost",
   port: 5432,
   user: "postgres",
-  password: "sourav",
+  password: "password",
   database: "postgres",
 });
 

@@ -7,42 +7,30 @@
 
 import { createClient } from "redis";
 import WebSocket from "ws";
-import { binanceService, getBinanceLink } from "@repo/config";
+import { binanceService, BinanceTrade, getBinanceLink } from "@repo/config";
 import { createTable } from "@repo/lib";
 
 // REDIS -> PUB SUB
 const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
 const redisClient = createClient({ url: redisUrl });
 
-interface BinanceBookTicker {
-  stream: String;
-  data: {
-    e: "bookTicker"; // Event type
-    u: number; // Order book updateId
-    s: string; // Symbol
-    b: string; // Best bid price
-    B: string; // Best bid qty
-    a: string; // Best ask price
-    A: string; // Best ask qty
-  };
-}
-
-interface BinanceTrade {
-  stream: string;
-  data: {
-    e: "trade";
-    E: number;
-    s: string;
-    t: number;
-    p: string;
-    q: string;
-    T: number;
-    m: boolean;
-    M: boolean;
-  };
-}
+// interface BinanceTrade {
+//   stream: string;
+//   data: {
+//     e: "trade";
+//     E: number;
+//     s: string;
+//     t: number;
+//     p: string;
+//     q: string;
+//     T: number;
+//     m: boolean;
+//     M: boolean;
+//   };
+// }
 
 // BINANCE -> api
+
 const binanceBaseUrl = "wss://stream.binance.com:443/stream?streams="; // WEBSOCKET base url
 // const service = ["btcusdt", "ethusdt", "bnbusdt"]; // service
 
@@ -73,7 +61,6 @@ async function main() {
       // console.log("Received message: ", data);
 
       // insert the query to the database
-      
 
       // push the data to redis pub sub
       await redisClient.publish(stream.toString(), JSON.stringify(trade));

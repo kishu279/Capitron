@@ -71,9 +71,13 @@ async function insertTrade(trade: BinanceTrade[]) {
 
     trade.map((t, index) => {
       const offset = index * 9;
+      
+      // valuesPlaceholders.push(
+      //   `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9})`
+      // );
 
       valuesPlaceholders.push(
-        `(${offset + 0}, ${offset + 1}, ${offset + 2}, ${offset + 3}, ${offset + 4}, ${offset + 5}, ${offset + 6}, ${offset + 7}, ${offset + 8})`
+        `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9})`
       );
 
       values.push(
@@ -95,7 +99,8 @@ async function insertTrade(trade: BinanceTrade[]) {
       VALUES ${valuesPlaceholders.join(", ")}
     `;
 
-    await poolClient.query(query, values);
+    const result = await poolClient.query(query, values);
+    console.log("Result: ", result.rowCount);
     console.log("Trade inserted successfully");
   } catch (error) {
     console.error("Error inserting trade: ", error);

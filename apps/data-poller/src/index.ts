@@ -60,20 +60,13 @@ async function main() {
       const data = JSON.parse(message.data.toString());
       const { stream, data: trade }: BinanceTrade = data;
 
-      // console.log("Received message: ", data);
-
       // insert the query to the database
       dataTrade.push(data);
 
       if (dataTrade.length == 50) {
         console.log("inserting data...");
-        // console.log(dataTrade);
-
-        // push the data the batch process
-        // await insertTrade(dataTrade);
+        await insertTrade(dataTrade);
         dataTrade.splice(0, 50);
-
-        console.log("data inserted");
       }
 
       // push the data to redis pub sub

@@ -178,6 +178,9 @@ importers:
         specifier: ^5.9.2
         version: 5.9.2
     devDependencies:
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../config
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config

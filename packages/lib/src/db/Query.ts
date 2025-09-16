@@ -1,9 +1,10 @@
+import type { BinanceTrade } from "@repo/config";
 // WRITE ALL THE QUERY RELATED
 // create the table
 // insert into the table
 // select from the table
 
-import dbClient from "./client.js";
+import pool from "./client.js";
 
 // {
 //   "e": "trade",       // Event type
@@ -20,7 +21,7 @@ import dbClient from "./client.js";
 // create the table
 const createTable = async () => {
   // connect the db client
-  await dbClient.connect();
+  const poolClient = await pool.connect();
   try {
     // query to create the table
     const query = `
@@ -42,16 +43,66 @@ const createTable = async () => {
         );
     `;
 
-    await dbClient.query(query);
+    await poolClient.query(query);
     console.log("Table created successfully");
   } catch (error) {
     console.error(error);
   }
 
   // close the db client
-  await dbClient.end();
+  poolClient.release();
 };
 
-async function insertTrade() {}
+// array of the trades for batch processing
+async function insertTrade(trade: BinanceTrade[]) {
+  const poolClient = await pool.connect();
 
-export { createTable };
+  try {
+    // const query = `
+    //   INSERT INTO binance_trades (event_type, event_time, symbol, trade_id, price, quantity, trade_time, is_market_maker, ignore)
+
+    //   VALUES (
+    //     ${trade.map((t) => `${t.data.e}, ${t.data.E}, ${t.data.s}, ${t.data.t}, ${t.data.p}, ${t.data.q}, ${t.data.T}, ${t.data.m}, ${t.data.M}`)}
+    //   )
+    // `;
+
+    const values: any[] = [];
+    const valuesPlaceholders: any[] = [];
+
+    trade.map((t, index) => {
+      const offset = index * 9;
+
+      valuesPlaceholders.push(
+        `(${offset + 0}, ${offset + 1}, ${offset + 2}, ${offset + 3}, ${offset + 4}, ${offset + 5}, ${offset + 6}, ${offset + 7}, ${offset + 8})`
+      );
+
+      values.push(
+        t.data.e,
+        t.data.E,
+        t.data.s,
+        t.data.t,
+        t.data.p,
+        t.data.q,
+        t.data.T,
+        t.data.m,
+        t.data.M
+      );
+    });
+
+    const query = `
+      INSERT INTO binance_trades (event_type, event_time, symbol, trade_id, price, quantity, trade_time, is_market_maker, ignore)
+
+      VALUES ${valuesPlaceholders.join(", ")}
+    `;
+
+    await poolClient.query(query, values);
+    console.log("Trade inserted successfully");
+  } catch (error) {
+    console.error("Error inserting trade: ", error);
+  }
+
+  // close the db client
+  poolClient.release();
+}
+
+export { createTable, insertTrade };

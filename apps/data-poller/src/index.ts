@@ -8,7 +8,7 @@
 import { createClient } from "redis";
 import WebSocket from "ws";
 import { binanceService, BinanceTrade, getBinanceLink } from "@repo/config";
-import { createTable } from "@repo/lib";
+import { createTable, insertTrade } from "@repo/lib";
 
 // REDIS -> PUB SUB
 const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
@@ -35,6 +35,8 @@ const binanceBaseUrl = "wss://stream.binance.com:443/stream?streams="; // WEBSOC
 // const service = ["btcusdt", "ethusdt", "bnbusdt"]; // service
 
 async function main() {
+  const dataTrade: BinanceTrade[] = [];
+
   try {
     // connect to the redis client
     await redisClient.connect();
@@ -61,6 +63,18 @@ async function main() {
       // console.log("Received message: ", data);
 
       // insert the query to the database
+      dataTrade.push(data);
+
+      if (dataTrade.length == 50) {
+        console.log("inserting data...");
+        // console.log(dataTrade);
+
+        // push the data the batch process
+        // await insertTrade(dataTrade);
+        dataTrade.splice(0, 50);
+
+        console.log("data inserted");
+      }
 
       // push the data to redis pub sub
       await redisClient.publish(stream.toString(), JSON.stringify(trade));

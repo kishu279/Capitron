@@ -1,6 +1,6 @@
-import client from "pg";
+import client, { Pool } from "pg";
 
-const dbClient = new client.Pool({
+const pool = new Pool({
   host: "localhost",
   port: 5432,
   user: "postgres",
@@ -8,4 +8,4 @@ const dbClient = new client.Pool({
   database: "postgres",
 });
 
-export default dbClient;
+export default pool;

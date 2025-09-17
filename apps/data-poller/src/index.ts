@@ -34,9 +34,9 @@ const redisClient = createClient({ url: redisUrl });
 const binanceBaseUrl = "wss://stream.binance.com:443/stream?streams="; // WEBSOCKET base url
 // const service = ["btcusdt", "ethusdt", "bnbusdt"]; // service
 
-async function main() {
-  const dataTrade: BinanceTrade[] = [];
+const dataTrade: BinanceTrade[] = [];
 
+async function main() {
   try {
     // connect to the redis client
     await redisClient.connect();
@@ -63,10 +63,10 @@ async function main() {
       // insert the query to the database
       dataTrade.push(data);
 
-      if (dataTrade.length == 50) {
+      if (dataTrade.length == 200) {
         console.log("inserting data...");
         await insertTrade(dataTrade);
-        dataTrade.splice(0, 50);
+        dataTrade.length = 0;
       }
 
       // push the data to redis pub sub

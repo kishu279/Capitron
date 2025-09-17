@@ -9,7 +9,7 @@ import React, { useEffect, useState } from "react";
 
 const webSocketLink = "ws://localhost:8080";
 
-export default function page() {
+export default function Page() {
   const [loading, setLoading] = useState<boolean>(false);
   const [socketConnection, setSocketConnection] = useState<WebSocket | null>(
     null

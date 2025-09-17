@@ -13,8 +13,8 @@ if [ "$1" = "timescale" ]; then
 
 elif [ "$1" = "redis" ]; then
     echo "Starting Redis container..."
-    sudo docker start 2209db2ac43c
-    sudo docker exec -it 2209db2ac43c redis-cli
+    sudo docker start 4da4fc818d37
+    sudo docker exec -it 4da4fc818d37 redis-cli
 
 else
     echo "Usage: $0 [timescale|redis]"

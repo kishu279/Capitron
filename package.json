@@ -1,5 +1,5 @@
 {
-  "name": "Capitron",
+  "name": "capitron",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -7,7 +7,7 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean && rm -rf .next dist out tsconfig.tsbuildinfo node_modules/.cache"
   },
   "devDependencies": {
     "prettier": "^3.6.2",

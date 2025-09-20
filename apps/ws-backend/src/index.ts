@@ -18,7 +18,7 @@ const wss = new WebSocketServer({ server: httpServer }); // create a websocket s
 // connections
 let clientWebsocket: WebSocket[] = [];
 
-function broadcastMessage(message: string) {
+function broadcastMessage(message: string): void {
   clientWebsocket.forEach((ws) => {
     if (ws.readyState === WebSocket.OPEN) {
       ws.send(message);
@@ -32,6 +32,8 @@ async function handleRedisMessages() {
 
     await redisClient.subscribe(stream, (message, channel) => {
       console.log("Received message from Redis on channel", channel, message);
+
+      broadcastMessage(message);
     });
   } catch (error) {
     console.error(error);

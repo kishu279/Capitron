@@ -22,6 +22,9 @@ function broadcastMessage(message: string): void {
   clientWebsocket.forEach((ws) => {
     if (ws.readyState === WebSocket.OPEN) {
       ws.send(message);
+    } else {
+      console.log("WebSocket is not open");
+      clientWebsocket = clientWebsocket.filter((client) => client !== ws);
     }
   });
 }
@@ -76,9 +79,6 @@ wss.on("connection", (ws) => {
   console.log("New client connected");
   ws.send("Welcome new client!");
 
-  // more event operation
-  // ...
-
   ws.on("close", () => {
     console.log("Client disconnected");
   });
@@ -89,6 +89,16 @@ wss.on("connection", (ws) => {
 
   ws.on("message", (message: Blob | ArrayBuffer | Buffer | ArrayBufferLike) => {
     console.log("Received message from client:", message.toString());
+
+    const messageData = JSON.parse(message.toString());
+
+    if (messageData.type === "join") {
+      clientWebsocket.push(ws);
+      console.log("Client joined the broadcast list");
+    } else if (messageData.type === "leave") {
+      clientWebsocket = clientWebsocket.filter((client) => client !== ws);
+      console.log("Client left the broadcast list");
+    }
   });
 });
 

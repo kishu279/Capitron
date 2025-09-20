@@ -179,6 +179,10 @@ export default function DashboardPage() {
       // EVENTS
       connection.onopen = () => {
         console.log("websocket connection opened");
+
+        // first join and then broadcast the message
+        const data = { type: "join" };
+        connection?.send(JSON.stringify(data));
       };
 
       connection.onmessage = (event) => {

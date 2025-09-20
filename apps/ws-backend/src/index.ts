@@ -1,14 +1,5 @@
-// STEPS WHAT TO DO
-// 1. Create a WebSocket Server
-// 2. Handle WebSocket Connections
-// 3. BroadCast Message to all connected clients
-// create a redis client and fetch from the users
-// 4. Fetch by USER :
-// 5min, etc, fetch from the database and do operation
-
 import { getStream } from "@repo/config";
-
-import { WebSocketServer } from "ws";
+import WebSocket, { WebSocketServer } from "ws";
 import { createServer } from "http";
 import express from "express";
 import { createClient } from "redis";
@@ -24,20 +15,53 @@ const app = express();
 const httpServer = createServer(app);
 const wss = new WebSocketServer({ server: httpServer }); // create a websocket server
 
-async function main() {
-  // create the redis client
-  await redisClient.connect();
-  console.log("Redis Client connected");
+// connections
+let clientWebsocket: WebSocket[] = [];
 
-  console.log(getStream());
-
-  await redisClient.subscribe(getStream(), (message, channel) => {
-    // console.log(`Received message from Redis on channel ${channel}:`, message);
+function broadcastMessage(message: string) {
+  clientWebsocket.forEach((ws) => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(message);
+    }
   });
-
-  // get the subscribed element from the redis
-  // the stream
 }
+
+async function handleRedisMessages() {
+  try {
+    const stream = getStream();
+
+    await redisClient.subscribe(stream, (message, channel) => {
+      console.log("Received message from Redis on channel", channel, message);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function main() {
+  try {
+    await redisClient.connect();
+
+    handleRedisMessages();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// async function main() {
+//   // create the redis client
+//   await redisClient.connect();
+//   console.log("Redis Client connected");
+
+//   console.log(getStream());
+
+//   await redisClient.subscribe(getStream(), (message, channel) => {
+//     // console.log(`Received message from Redis on channel ${channel}:`, message);
+//   });
+
+//   // get the subscribed element from the redis
+//   // the stream
+// }
 
 app.use(express.json());
 

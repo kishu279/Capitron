@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "../sections/navbar";
 import Sidebar from "../sections/sidebar";
+
+const webSocketServerLink = "ws://localhost:8080";
 
 const sampleSidebarOptions = [
   {
@@ -162,68 +164,48 @@ const sampleSidebarOptions = [
   },
 ];
 
-const sidebarOptions = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    icon: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-        />
-      </svg>
-    ),
-    onClick: () => setSelectOption("dashboard"),
-  },
-  {
-    id: "trading",
-    label: "Trading",
-    icon: (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-        />
-      </svg>
-    ),
-    children: [
-      {
-        id: "live-trades",
-        label: "Spot Trading",
-        onClick: () => setSelectOption("live-trades"),
-      },
-      {
-        id: "candlestick-trades-ohlc",
-        label: "Futures Trading",
-        onClick: () => setSelectOption("candlestick-trades-ohlc"),
-      },
-      // {
-      //   id: "options-trading",
-      //   label: "Options Trading",
-      //   onClick: () => console.log("Options Trading clicked"),
-      // },
-    ],
-  },
-];
-
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectOption, setSelectOption] = useState("dashboard");
+  const [connection, setConn] = useState<WebSocket | null>(null);
+  const [data, setData] = useState<any>([]);
+
+  useEffect(() => {
+    let connection: WebSocket | null = null;
+
+    try {
+      connection = new WebSocket(webSocketServerLink); // create a new connection
+
+      // EVENTS
+      connection.onopen = () => {
+        console.log("websocket connection opened");
+      };
+
+      connection.onmessage = (event) => {
+        // get the type data from the message
+        const message = JSON.parse(event.data); // parse the message
+        console.log("message received:", message);
+      };
+
+      connection.onclose = () => {
+        console.log("websocket connection closed");
+      };
+
+      connection.onerror = (error) => {
+        console.error("websocket connection error:", error);
+      };
+    } catch (error) {
+      console.error("Error creating WebSocket connection:", error);
+    }
+
+    return () => {
+      if (connection && connection.readyState === WebSocket.OPEN) {
+        connection.close();
+        console.log("WebSocket connection closed");
+      }
+      setConn(null);
+    };
+  }, []);
 
   const sidebarOptions = [
     {
@@ -278,6 +260,8 @@ export default function DashboardPage() {
       ],
     },
   ];
+
+  // get the data from the web socket
 
   return (
     <div className="min-h-screen bg-gray-50">

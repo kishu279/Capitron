@@ -63,19 +63,19 @@ async function insertTrade(trade: BinanceTrade[]) {
       const eventTimeInSeconds = Math.floor(t.data.E / 1000); // Convert event time to seconds
       const tradeTimeInSeconds = Math.floor(t.data.T / 1000); // Convert trade time to seconds
 
-      console.log(
-        "Event Time (Converted):",
-        eventTimeInSeconds,
-        "Trade Time (Converted):",
-        tradeTimeInSeconds
-      );
+      // console.log(
+      //   "Event Time (Converted):",
+      //   eventTimeInSeconds,
+      //   "Trade Time (Converted):",
+      //   tradeTimeInSeconds
+      // );
 
-      console.log(
-        "Original Event Time (ms):",
-        new Date(t.data.E).toUTCString(),
-        "Original Trade Time (ms):",
-        new Date(t.data.T).toUTCString()
-      );
+      // console.log(
+      //   "Original Event Time (ms):",
+      //   new Date(t.data.E).toUTCString(),
+      //   "Original Trade Time (ms):",
+      //   new Date(t.data.T).toUTCString()
+      // );
 
       // Adjusted placeholders for the INSERT query
       valuesPlaceholders.push(

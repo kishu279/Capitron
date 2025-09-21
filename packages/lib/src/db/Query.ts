@@ -131,9 +131,10 @@ async function getTrade(time: string) {
 
   try {
     const query = `
-      SELECT time_bucket('5 min', event_time) AS bucket,
-      AVG(price) AS avg_price,
-      AVG(quantity) AS avg_quantity
+      SELECT time_bucket('${time}', event_time) AS bucket,
+      MAX(price) AS max_trade,
+      MIN(quantity) AS min_trade
+      
       FROM binance_trades
       GROUP BY
       symbol, bucket

@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { AreaSeries, createChart, ColorType } from "lightweight-charts";
+import {
+  AreaSeries,
+  createChart,
+  ColorType,
+  IChartApi,
+} from "lightweight-charts";
 
 enum ChartTypes {
   Trade = "trade",
@@ -45,6 +50,8 @@ export default function LiveTrades(props: TradingProps) {
   const [selectedTradeService, setSelectedTradeService] =
     useState<TradesService>(TradesService.BTCUSDT);
 
+  // chart reference
+  const [chartSeries, setChartSeries] = useState<IChartApi | null>(null);
   // Chart type is fixed to Trade only
   const selectedChartType = ChartTypes.Trade;
 
@@ -79,6 +86,43 @@ export default function LiveTrades(props: TradingProps) {
   }, [selectedTradeService]); // Only selectedTradeService since chartType is fixed
 
   useEffect(() => {
+    console.log("WebSocket connection in LiveTrades:", wsConnection);
+    console.log("WebSocket readyState:", wsConnection?.readyState);
+
+    if (!wsConnection) {
+      console.log("WebSocket connection not found");
+      return;
+    }
+
+    if (wsConnection.readyState !== WebSocket.OPEN) {
+      console.log(
+        "WebSocket connection not open yet, readyState:",
+        wsConnection.readyState
+      );
+      return;
+    }
+
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const message = JSON.parse(event.data);
+        console.log("Trade message received:", message);
+        console.log(`Current trade service: ${selectedTradeService}`);
+
+        // Here you can filter messages based on selectedTradeService
+        // Example: if (message.symbol === selectedTradeService.toUpperCase()) { ... }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    };
+
+    wsConnection.addEventListener("message", handleMessage);
+
+    return () => {
+      wsConnection.removeEventListener("message", handleMessage);
+    };
+  }, [wsConnection, selectedTradeService]);
+
+  useEffect(() => {
     const handleResize = () => {
       chart.applyOptions({ width: chartContainerRef.current?.clientWidth });
     };
@@ -95,22 +139,28 @@ export default function LiveTrades(props: TradingProps) {
       topColor: areaTopColor,
       bottomColor: areaBottomColor,
     });
+
+    // to use on the chart
+    setChartSeries(chart);
+
+    // initial data store
     series.setData(trade_data);
 
-    // update the chart data based on selections
-    if (wsConnection !== null) {
+    // series.update();
+    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
       wsConnection.onmessage = (event) => {
+        console.log("WebSocket message received");
         const message = JSON.parse(event.data);
 
-        console.log("message received:", message);
-        console.log(
-          `Current chart type: ${selectedChartType}, Trade service: ${selectedTradeService}`
-        );
-
-        // Here you would filter and process the message based on selectedChartType and selectedTradeService
-        // Example: if (message.symbol === selectedTradeService && message.type === selectedChartType) { ... }
+        // console.log((message.time));
+        series.update(message);
       };
     }
+
+    // if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+    //   // connection oriented
+    //   // series.update()
+    // }
 
     window.addEventListener("resize", handleResize);
 

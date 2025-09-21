@@ -33,10 +33,30 @@ async function handleRedisMessages() {
   try {
     const stream: any[] = getStream();
 
-    await redisClient.subscribe(stream, (message, channel) => {
+    await redisClient.subscribe(stream.at(0), (message, channel) => {
       console.log("Received message from Redis on channel", channel, message);
 
-      broadcastMessage(message);
+      const parsedData = JSON.parse(message);
+
+      let date = new Date(parsedData.T);
+
+      // Format the date to YYYY-MM-DD
+      let formattedDate =
+        date.getFullYear() +
+        "-" +
+        String(date.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(date.getDate()).padStart(2, "0");
+
+      const data = {
+        symbol: parsedData.s,
+        time: formattedDate,
+        value: Number(parsedData.p),
+      };
+
+      console.log("Broadcasting data to clients:", data);
+
+      broadcastMessage(JSON.stringify(data));
     });
   } catch (error) {
     console.error(error);
@@ -46,6 +66,8 @@ async function handleRedisMessages() {
 async function main() {
   try {
     await redisClient.connect();
+
+    handleRedisMessages();
   } catch (error) {
     console.error(error);
   }
@@ -96,8 +118,6 @@ wss.on("connection", (ws) => {
     } else if (messageData.type === "leave") {
       clientWebsocket = clientWebsocket.filter((client) => client !== ws);
       console.log("Client left the broadcast list");
-    } else if (messageData.type === "trade_data") {
-      handleRedisMessages();
     }
   });
 });

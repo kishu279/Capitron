@@ -169,46 +169,60 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectOption, setSelectOption] = useState("dashboard");
   const [connection, setConn] = useState<WebSocket | null>(null);
-  const [data, setData] = useState<any>([]);
+  const [connectionStatus, setConnectionStatus] = useState<
+    "connecting" | "connected" | "disconnected" | "error"
+  >("disconnected");
 
   useEffect(() => {
-    let connection: WebSocket | null = null;
+    let wsConnection: WebSocket | null = null;
 
     try {
-      connection = new WebSocket(webSocketServerLink); // create a new connection
+      setConnectionStatus("connecting");
+      wsConnection = new WebSocket(webSocketServerLink); // create a new connection
 
       // EVENTS
-      connection.onopen = () => {
+      wsConnection.onopen = () => {
         console.log("websocket connection opened");
+        setConn(wsConnection); // Store the connection in state
+        setConnectionStatus("connected");
 
         // first join and then broadcast the message
         const data = { type: "join" };
-        connection?.send(JSON.stringify(data));
+        wsConnection?.send(JSON.stringify(data));
       };
 
-      // connection.onmessage = (event) => {
-      //   // get the type data from the message
-      //   const message = JSON.parse(event.data); // parse the message
-      //   console.log("message received:", message);
+      wsConnection.onclose = () => {
+        console.log("websocket connection closed");
+        setConn(null); // Clear the connection from state
+        setConnectionStatus("disconnected");
+
+        // send the send the trade
+        wsConnection?.send(JSON.stringify({ type: "trade_data" }));
+      };
+
+      // wsConnection.onmessage = (event) => {
+      //   // const data = JSON.parse(event.data);
+      //   console.log("Received message from server:", event.data);
       // };
 
-      connection.onclose = () => {
-        console.log("websocket connection closed");
-      };
-
-      connection.onerror = (error) => {
+      wsConnection.onerror = (error) => {
         console.error("websocket connection error:", error);
+        setConn(null); // Clear the connection from state on error
+        setConnectionStatus("error");
       };
     } catch (error) {
       console.error("Error creating WebSocket connection:", error);
+      setConn(null);
+      setConnectionStatus("error");
     }
 
     return () => {
-      if (connection && connection.readyState === WebSocket.OPEN) {
-        connection.close();
+      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+        wsConnection.close();
         console.log("WebSocket connection closed");
       }
       setConn(null);
+      setConnectionStatus("disconnected");
     };
   }, []);
 
@@ -323,7 +337,7 @@ export default function DashboardPage() {
               </h1>
 
               {/* Content area */}
-              <div className="bg-white rounded-lg shadow p-6" >
+              <div className="bg-white rounded-lg shadow p-6">
                 {selectOption === "dashboard" && (
                   <>
                     <p className="text-gray-600">

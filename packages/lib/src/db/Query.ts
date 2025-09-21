@@ -134,7 +134,6 @@ async function getTrade(time: string) {
       SELECT time_bucket('${time}', event_time) AS bucket,
       MAX(price) AS max_trade,
       MIN(quantity) AS min_trade
-      
       FROM binance_trades
       GROUP BY
       symbol, bucket

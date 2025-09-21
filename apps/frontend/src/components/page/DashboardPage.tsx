@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import NavBar from "../sections/navbar";
 import Sidebar from "../sections/sidebar";
+import LiveTrades from "../sections/live-trades";
 
 const webSocketServerLink = "ws://localhost:8080";
 
@@ -185,11 +186,11 @@ export default function DashboardPage() {
         connection?.send(JSON.stringify(data));
       };
 
-      connection.onmessage = (event) => {
-        // get the type data from the message
-        const message = JSON.parse(event.data); // parse the message
-        console.log("message received:", message);
-      };
+      // connection.onmessage = (event) => {
+      //   // get the type data from the message
+      //   const message = JSON.parse(event.data); // parse the message
+      //   console.log("message received:", message);
+      // };
 
       connection.onclose = () => {
         console.log("websocket connection closed");
@@ -253,12 +254,12 @@ export default function DashboardPage() {
       children: [
         {
           id: "live-trades",
-          label: "Spot Trading",
+          label: "Live Trades",
           onClick: () => setSelectOption("live-trades"),
         },
         {
           id: "candlestick-trades-ohlc",
-          label: "Futures Trading",
+          label: "candlestick-trades-ohlc",
           onClick: () => setSelectOption("candlestick-trades-ohlc"),
         },
       ],
@@ -322,7 +323,7 @@ export default function DashboardPage() {
               </h1>
 
               {/* Content area */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow p-6" >
                 {selectOption === "dashboard" && (
                   <>
                     <p className="text-gray-600">
@@ -334,13 +335,16 @@ export default function DashboardPage() {
                   </>
                 )}
                 {selectOption === "live-trades" && (
-                  <>
-                    <p className="text-gray-600">Spot Trading Interface</p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Real-time spot trading functionality will be implemented
-                      here.
-                    </p>
-                  </>
+                  <LiveTrades
+                    wsConnection={connection}
+                    color={{
+                      backgroundColor: "#1f2937",
+                      lineColor: "#3b82f6",
+                      textColor: "#f9fafb",
+                      areaTopColor: "#3b82f6",
+                      areaBottomColor: "rgba(59, 130, 246, 0.28)",
+                    }}
+                  />
                 )}
                 {selectOption === "candlestick-trades-ohlc" && (
                   <>

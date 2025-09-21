@@ -31,7 +31,7 @@ function broadcastMessage(message: string): void {
 
 async function handleRedisMessages() {
   try {
-    const stream = getStream();
+    const stream: any[] = getStream();
 
     await redisClient.subscribe(stream, (message, channel) => {
       console.log("Received message from Redis on channel", channel, message);
@@ -46,8 +46,6 @@ async function handleRedisMessages() {
 async function main() {
   try {
     await redisClient.connect();
-
-    handleRedisMessages();
   } catch (error) {
     console.error(error);
   }
@@ -98,6 +96,8 @@ wss.on("connection", (ws) => {
     } else if (messageData.type === "leave") {
       clientWebsocket = clientWebsocket.filter((client) => client !== ws);
       console.log("Client left the broadcast list");
+    } else if (messageData.type === "trade_data") {
+      handleRedisMessages();
     }
   });
 });

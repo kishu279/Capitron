@@ -63,14 +63,14 @@ async function main() {
       // insert the query to the database
       dataTrade.push(data);
 
+      // push the data to redis pub sub
+      await redisClient.publish(stream.toString(), JSON.stringify(trade));
+
       if (dataTrade.length == 200) {
         console.log("inserting data...");
         await insertTrade(dataTrade);
         dataTrade.length = 0;
       }
-
-      // push the data to redis pub sub
-      await redisClient.publish(stream.toString(), JSON.stringify(trade));
     };
 
     websocketClient.onclose = () => {

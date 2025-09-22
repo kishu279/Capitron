@@ -13,16 +13,10 @@ enum ChartTypes {
   OrderBook = "orderBook",
 }
 
-enum TradesService {
-  BTCUSDT = "btcusdt",
-  ETHUSDT = "ethusdt",
-  BNBUSDT = "bnbusdt",
-}
-
 interface TradingProps {
   wsConnection: WebSocket | null;
   chartType?: ChartTypes;
-  trades?: TradesService[];
+  trades?: any;
   color?: {
     backgroundColor: string;
     lineColor: string;
@@ -47,8 +41,7 @@ const trade_data = [
 
 export default function LiveTrades(props: TradingProps) {
   // State for user selections - only trade service since chart type is fixed to Trade
-  const [selectedTradeService, setSelectedTradeService] =
-    useState<TradesService>(TradesService.BTCUSDT);
+  const [selectedTradeService, setSelectedTradeService] = useState<any>(null);
 
   // chart reference
   const [chartSeries, setChartSeries] = useState<IChartApi | null>(null);
@@ -59,7 +52,6 @@ export default function LiveTrades(props: TradingProps) {
   const {
     wsConnection,
     chartType = ChartTypes.Trade,
-    trades = TradesService.BTCUSDT,
     color: {
       backgroundColor = "white",
       lineColor = "#2962FF",
@@ -197,13 +189,13 @@ export default function LiveTrades(props: TradingProps) {
           <select
             value={selectedTradeService}
             onChange={(e) =>
-              setSelectedTradeService(e.target.value as TradesService)
+              setSelectedTradeService(e.target.value)
             }
             className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
           >
-            <option value={TradesService.BTCUSDT}>BTC/USDT</option>
+            {/* <option value={TradesService.BTCUSDT}>BTC/USDT</option>
             <option value={TradesService.ETHUSDT}>ETH/USDT</option>
-            <option value={TradesService.BNBUSDT}>BNB/USDT</option>
+            <option value={TradesService.BNBUSDT}>BNB/USDT</option> */}
           </select>
         </div>
 

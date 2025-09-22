@@ -33,7 +33,7 @@ async function handleRedisMessages() {
   try {
     const stream: any[] = getStream();
 
-    await redisClient.subscribe(stream.at(0), (message, channel) => {
+    await redisClient.subscribe(stream, (message, channel) => {
       console.log("Received message from Redis on channel", channel, message);
 
       const parsedData = JSON.parse(message);
@@ -67,7 +67,7 @@ async function main() {
   try {
     await redisClient.connect();
 
-    handleRedisMessages();
+    await handleRedisMessages();
   } catch (error) {
     console.error(error);
   }
@@ -97,7 +97,6 @@ app.get("/", (req, res) => {
 
 wss.on("connection", (ws) => {
   console.log("New client connected");
-  ws.send("Welcome new client!");
 
   ws.on("close", () => {
     console.log("Client disconnected");

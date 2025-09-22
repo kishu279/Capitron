@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 
 type MarketData = {
@@ -124,6 +125,7 @@ export default function MarketTable(props: MarketTableProps) {
 }
 
 function MarketRow(data: MarketData) {
+  const router = useRouter();
   // Helper functions for better formatting
   const formatValue = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -215,7 +217,12 @@ function MarketRow(data: MarketData) {
 
           {/* Action Section */}
           <div className="flex justify-center md:justify-end space-x-2">
-            <button className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
+            <button
+              className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+              onClick={() => {
+                router.push(`/market/${data.symbol}`);
+              }}
+            >
               Track
             </button>
             <button className="px-4 py-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium">

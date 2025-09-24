@@ -61,16 +61,24 @@ async function main() {
       const { stream, data: trade }: BinanceTrade = data;
 
       // insert the query to the database
-      dataTrade.push(data);
+      // dataTrade.push(data);
+
+      // push the data to the database
+      // await redisClient.xAdd("trades", "*", trade);
+
+      console.log("types:", typeof trade);
+      console.log("Received data:", trade);
+
+      await redisClient.xAdd("trades", "*", { data: JSON.stringify(trade) });
 
       // push the data to redis pub sub
       await redisClient.publish(stream.toString(), JSON.stringify(trade));
 
-      if (dataTrade.length == 200) {
-        console.log("inserting data...");
-        await insertTrade(dataTrade);
-        dataTrade.length = 0;
-      }
+      // if (dataTrade.length == 200) {
+      //   console.log("inserting data...");
+      //   await insertTrade(dataTrade);
+      //   dataTrade.length = 0;
+      // }
     };
 
     websocketClient.onclose = () => {

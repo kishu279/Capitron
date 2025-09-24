@@ -32,6 +32,8 @@ export default function MarketTable(props: MarketTableProps) {
         wsConnection.current.onmessage = (event) => {
           const message = JSON.parse(event.data);
 
+          console.log(message);
+
           setData((prev) => {
             return {
               ...prev,

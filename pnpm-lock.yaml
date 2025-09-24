@@ -49,6 +49,18 @@ importers:
         specifier: ^8.5.10
         version: 8.18.1
 
+  apps/db-worker:
+    dependencies:
+      '@repo/lib':
+        specifier: workspace:*
+        version: link:../../packages/lib
+      redis:
+        specifier: ^5.8.2
+        version: 5.8.2
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
   apps/frontend:
     dependencies:
       lightweight-charts:

@@ -1,11 +1,12 @@
+import MarketTradePage from "@/components/page/MarketTradePage";
 import React from "react";
 
-export default function MarketTrade({
+export default async function MarketTrade({
   params,
 }: {
   params: { marketId: string };
 }) {
-  const { marketId } = params;
+  const { marketId } = await params;
 
-  return <div>{marketId}</div>;
+  return <MarketTradePage marketId={marketId} />;
 }

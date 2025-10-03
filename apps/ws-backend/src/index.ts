@@ -15,26 +15,51 @@ const app = express();
 const httpServer = createServer(app);
 const wss = new WebSocketServer({ server: httpServer }); // create a websocket server
 
+type ClientRedisMssgType = {
+  conn: WebSocket;
+  stream: string[];
+};
+
 // connections
-let clientWebsocket: WebSocket[] = [];
+let clientWebsocket: ClientRedisMssgType[] = [];
 
 function broadcastMessage(message: string): void {
-  clientWebsocket.forEach((ws) => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(message);
-    } else {
-      console.log("WebSocket is not open");
-      clientWebsocket = clientWebsocket.filter((client) => client !== ws);
+  // console.log("Stream Name:", streamName);
+  const streamName = JSON.parse(message).symbol;
+  clientWebsocket = clientWebsocket.filter((client) => {
+    console.log(
+      client.stream.includes(streamName)
+        ? "Was subscribed"
+        : "Was not subscribed",
+      "name of stream is ",
+      streamName
+    );
+
+    if (client.conn.readyState !== WebSocket.OPEN) {
+      console.log("Removing closed client");
+
+      // return false; // drop disconnected clients
     }
+
+    if (
+      client.conn.readyState === WebSocket.OPEN &&
+      client.stream.includes(streamName) // if not subscribed to any stream, send all
+    ) {
+      // send to all the clients who are subscribed to the stream
+      // console.log("Client Stream:", message);
+      client.conn.send(message);
+    }
+
+    return true;
   });
 }
 
+const stream: any[] = getStream();
+
 async function handleRedisMessages() {
   try {
-    const stream: any[] = getStream();
-
     await redisClient.subscribe(stream, (message, channel) => {
-      console.log("Received message from Redis on channel", channel, message);
+      // console.log("Received message from Redis on channel", channel, message);
 
       const parsedData = JSON.parse(message);
 
@@ -54,7 +79,7 @@ async function handleRedisMessages() {
         value: Number(parsedData.p),
       };
 
-      console.log("Broadcasting data to clients:", data);
+      // console.log("Broadcasting data to clients:", data);
 
       broadcastMessage(JSON.stringify(data));
     });
@@ -66,6 +91,8 @@ async function handleRedisMessages() {
 async function main() {
   try {
     await redisClient.connect();
+
+    console.log(getStream());
 
     await handleRedisMessages();
   } catch (error) {
@@ -97,11 +124,35 @@ wss.on("connection", (ws) => {
     const messageData = JSON.parse(message.toString());
 
     if (messageData.type === "join") {
-      clientWebsocket.push(ws);
+      // clientWebsocket.push(ws);
+      clientWebsocket.push({ conn: ws, stream: [] }); // by default subscribe to all streams
       console.log("Client joined the broadcast list");
     } else if (messageData.type === "leave") {
-      clientWebsocket = clientWebsocket.filter((client) => client !== ws);
+      clientWebsocket = clientWebsocket.filter((client) => client.conn !== ws);
       console.log("Client left the broadcast list");
+    } else if (messageData.type === `subscribe`) {
+      console.log(`Client subscribed to ${messageData.stream}`);
+
+      // change the stream array
+      clientWebsocket.filter((client) => {
+        if (
+          client.conn === ws && // if present in the array
+          client.stream.includes(messageData.stream) === false // avoid duplicates
+        ) {
+          client.stream.push(messageData.stream);
+          console.log("Updated client streams:", client.stream);
+          console.log(client.stream);
+        }
+      });
+    } else if (messageData.type === `unsubscribe`) {
+      console.log(`Client unsubscribed from ${messageData.stream}`);
+
+      clientWebsocket.filter((client) => {
+        if (client.conn === ws) {
+          client.stream = client.stream.filter((s) => s !== messageData.stream);
+          console.log("Updated client streams:", client.stream);
+        }
+      });
     }
   });
 });

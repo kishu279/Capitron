@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 
 type MarketTradePageProps = {
@@ -7,7 +9,7 @@ type MarketTradePageProps = {
 export default function MarketTradePage(props: MarketTradePageProps) {
   const { marketId } = props;
   //   const [data, setData] = useState<Record<string, MarketData>>({});
-    const wsConnection = useRef<WebSocket | null>(null);
+  const wsConnection = useRef<WebSocket | null>(null);
 
   // const stream =
   useEffect(() => {
@@ -26,17 +28,17 @@ export default function MarketTradePage(props: MarketTradePageProps) {
         wsConnection.current.onmessage = (event) => {
           const message = JSON.parse(event.data);
 
-          console.log(message);
+          // console.log(message);
 
-        //   setData((prev) => {
-        //     return {
-        //       ...prev,
-        //       [message.symbol]: {
-        //         ...prev[message.symbol],
-        //         ...message,
-        //       },
-        //     };
-        //   });
+          //   setData((prev) => {
+          //     return {
+          //       ...prev,
+          //       [message.symbol]: {
+          //         ...prev[message.symbol],
+          //         ...message,
+          //       },
+          //     };
+          //   });
         };
 
         wsConnection.current.onclose = () => {

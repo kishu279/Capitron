@@ -42,9 +42,6 @@ async function main() {
     await redisClient.connect();
     console.log("Redis Client connected");
 
-    // create the table
-    // await createTable();
-
     // link
     const paramsLink = getBinanceLink();
     const fullLink = `${binanceBaseUrl}${paramsLink}`;
@@ -60,25 +57,25 @@ async function main() {
       const data = JSON.parse(message.data.toString());
       const { stream, data: trade }: BinanceTrade = data;
 
-      // insert the query to the database
-      // dataTrade.push(data);
-
-      // push the data to the database
-      // await redisClient.xAdd("trades", "*", trade);
-
-      console.log("types:", typeof trade);
-      console.log("Received data:", trade);
-
-      await redisClient.xAdd("trades", "*", { data: JSON.stringify(trade) });
-
       // push the data to redis pub sub
-      await redisClient.publish(stream.toString(), JSON.stringify(trade));
+      // ...
+      await redisClient.publish(stream, JSON.stringify(trade));
 
-      // if (dataTrade.length == 200) {
-      //   console.log("inserting data...");
-      //   await insertTrade(dataTrade);
-      //   dataTrade.length = 0;
-      // }
+      // push the data to redis streams
+      // ...
+      // const response = await redisClient.xAdd(
+      //   "trades:binance",
+      //   "*",
+      //   { data: JSON.stringify(trade) }
+      //   //   {
+      //   //   rider: "Prickett",
+      //   //   speed: "29.7",
+      //   //   position: "2",
+      //   //   location_id: "1",
+      //   // }
+      // );
+
+      // console.log("Trade pushed to Redis Stream with ID:", response);
     };
 
     websocketClient.onclose = () => {

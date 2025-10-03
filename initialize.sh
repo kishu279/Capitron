@@ -8,13 +8,13 @@
 
 if [ "$1" = "timescale" ]; then 
     echo "Starting Timescale container..."
-    sudo docker start 941093be7ed1
+    sudo docker start 9a62c6b01fba
     sudo docker exec -it timescaledb psql -d "postgres://postgres:password@localhost/postgres"
 
 elif [ "$1" = "redis" ]; then
     echo "Starting Redis container..."
-    sudo docker start 1b4859620aad
-    sudo docker exec -it 1b4859620aad redis-cli
+    sudo docker start f8a6b31cd56e
+    sudo docker exec -it f8a6b31cd56e redis-cli
 
 else
     echo "Usage: $0 [timescale|redis]"

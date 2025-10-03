@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -b",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +15,7 @@
   "dependencies": {
     "redis": "^5.8.2",
     "typescript": "^5.9.2",
-    "@repo/lib": "workspace:*"
+    "@repo/lib": "workspace:*",
+    "tsx": "^4.19.0"
   }
 }

@@ -73,21 +73,6 @@ async function main() {
   }
 }
 
-// async function main() {
-//   // create the redis client
-//   await redisClient.connect();
-//   console.log("Redis Client connected");
-
-//   console.log(getStream());
-
-//   await redisClient.subscribe(getStream(), (message, channel) => {
-//     // console.log(`Received message from Redis on channel ${channel}:`, message);
-//   });
-
-//   // get the subscribed element from the redis
-//   // the stream
-// }
-
 app.use(express.json());
 
 app.get("/", (req, res) => {

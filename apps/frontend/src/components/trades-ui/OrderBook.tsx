@@ -286,4 +286,4 @@ const OrderBookChartAskAndBid = () => {
   return <div ref={chartRef} style={{ height: "400px", width: "100%" }} />;
 };
 
-export default OrderBookChart;
+export default OrderBookChartAskAndBid;

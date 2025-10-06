@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import OrderBookChart from "../trades-ui/OrderBook";
+import TradesDisplay, { TradeData } from "../trades-ui/TradesDisplay";
 
 type MarketTradePageProps = {
   marketId: string;
@@ -9,9 +10,8 @@ type MarketTradePageProps = {
 
 export default function MarketTradePage(props: MarketTradePageProps) {
   const { marketId } = props;
-  //   const [data, setData] = useState<Record<string, MarketData>>({});
   const wsConnection = useRef<WebSocket | null>(null);
-  const [marketData, setMaretData] = useState<any>({});
+  const [marketData, setMaretData] = useState<TradeData[]>([]);
 
   // const stream =
   useEffect(() => {
@@ -35,15 +35,27 @@ export default function MarketTradePage(props: MarketTradePageProps) {
 
           console.log(message);
 
-          //   setData((prev) => {
-          //     return {
-          //       ...prev,
-          //       [message.symbol]: {
-          //         ...prev[message.symbol],
-          //         ...message,
-          //       },
-          //     };
-          //   });
+          setMaretData((prev) => {
+            // Transform the message to match TradeData interface
+            const tradeData: TradeData = {
+              symbol: message.symbol || marketId,
+              time: message.time || new Date().toISOString(),
+              value: parseFloat(message.value) || 0,
+              side: message.side || (Math.random() > 0.5 ? "buy" : "sell"),
+              volume: message.volume
+                ? parseFloat(message.volume)
+                : Math.floor(Math.random() * 1000),
+            };
+
+            const newTrades = [tradeData, ...prev];
+
+            // Keep only the latest 15 trades
+            if (newTrades.length > 15) {
+              newTrades.pop();
+            }
+
+            return newTrades;
+          });
         };
 
         wsConnection.current.onclose = () => {
@@ -69,9 +81,18 @@ export default function MarketTradePage(props: MarketTradePageProps) {
   }, []);
 
   return (
-    <div className="w-full h-screen bg-white">
-      <div className="">
-        <OrderBookChart />
+    <div className="w-full h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+      <div className="flex flex-col items-center justify-center h-full p-8">
+        {/* Single Live Trades Display */}
+        {/* <TradesDisplay
+          marketData={marketData}
+          title={`${marketId} Live Trades`}
+          height="h-[500px]"
+          width="w-[600px]"
+          maxItems={15}
+          showVolume={true}
+          className="shadow-2xl"
+        /> */}
       </div>
     </div>
   );

@@ -27,23 +27,13 @@ function broadcastMessage(message: string): void {
   // console.log("Stream Name:", streamName);
   const streamName = JSON.parse(message).symbol;
   clientWebsocket = clientWebsocket.filter((client) => {
-    console.log(
-      client.stream.includes(streamName)
-        ? "Was subscribed"
-        : "Was not subscribed",
-      "name of stream is ",
-      streamName
-    );
-
     if (client.conn.readyState !== WebSocket.OPEN) {
-      console.log("Removing closed client");
-
-      // return false; // drop disconnected clients
+      return false; // drop disconnected clients
     }
 
     if (
       client.conn.readyState === WebSocket.OPEN &&
-      client.stream.includes(streamName) // if not subscribed to any stream, send all
+      (client.stream.length === 0 || client.stream.includes(streamName)) // if not subscribed to any stream, send all
     ) {
       // send to all the clients who are subscribed to the stream
       // console.log("Client Stream:", message);
@@ -91,9 +81,7 @@ async function handleRedisMessages() {
 async function main() {
   try {
     await redisClient.connect();
-
     console.log(getStream());
-
     await handleRedisMessages();
   } catch (error) {
     console.error(error);

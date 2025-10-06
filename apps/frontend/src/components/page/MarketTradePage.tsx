@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import OrderBookChart from "../trades-ui/OrderBook";
 
 type MarketTradePageProps = {
   marketId: string;
@@ -10,6 +11,7 @@ export default function MarketTradePage(props: MarketTradePageProps) {
   const { marketId } = props;
   //   const [data, setData] = useState<Record<string, MarketData>>({});
   const wsConnection = useRef<WebSocket | null>(null);
+  const [marketData, setMaretData] = useState<any>({});
 
   // const stream =
   useEffect(() => {
@@ -23,12 +25,15 @@ export default function MarketTradePage(props: MarketTradePageProps) {
         wsConnection.current.onopen = () => {
           console.log("WebSocket is connected");
           wsConnection.current!.send(JSON.stringify({ type: "join" }));
+          wsConnection.current!.send(
+            JSON.stringify({ type: "subscribe", stream: marketId })
+          );
         };
 
         wsConnection.current.onmessage = (event) => {
           const message = JSON.parse(event.data);
 
-          // console.log(message);
+          console.log(message);
 
           //   setData((prev) => {
           //     return {
@@ -64,8 +69,10 @@ export default function MarketTradePage(props: MarketTradePageProps) {
   }, []);
 
   return (
-    <div className="w-full h-full bg-white">
-      <div className=""></div>
+    <div className="w-full h-screen bg-white">
+      <div className="">
+        <OrderBookChart />
+      </div>
     </div>
   );
 }

@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import OrderBookChart from "../trades-ui/OrderBook";
-import TradesDisplay, { TradeData } from "../trades-ui/TradesDisplay";
 
 type MarketTradePageProps = {
   marketId: string;
@@ -11,7 +10,6 @@ type MarketTradePageProps = {
 export default function MarketTradePage(props: MarketTradePageProps) {
   const { marketId } = props;
   const wsConnection = useRef<WebSocket | null>(null);
-  const [marketData, setMaretData] = useState<TradeData[]>([]);
 
   // const stream =
   useEffect(() => {
@@ -33,27 +31,27 @@ export default function MarketTradePage(props: MarketTradePageProps) {
         wsConnection.current.onmessage = (event) => {
           const message = JSON.parse(event.data);
 
-          setMaretData((prev) => {
-            // Transform the message to match TradeData interface
-            const tradeData: TradeData = {
-              symbol: message.symbol || marketId,
-              time: message.time || new Date().toISOString(),
-              value: parseFloat(message.value) || 0,
-              side: message.side || (Math.random() > 0.5 ? "buy" : "sell"),
-              volume: message.volume
-                ? parseFloat(message.volume)
-                : Math.floor(Math.random() * 1000),
-            };
+          // setMaretData((prev) => {
+          //   // Transform the message to match TradeData interface
+          //   const tradeData: TradeData = {
+          //     symbol: message.symbol || marketId,
+          //     time: message.time || new Date().toISOString(),
+          //     value: parseFloat(message.value) || 0,
+          //     side: message.side || (Math.random() > 0.5 ? "buy" : "sell"),
+          //     volume: message.volume
+          //       ? parseFloat(message.volume)
+          //       : Math.floor(Math.random() * 1000),
+          //   };
 
-            const newTrades = [tradeData, ...prev];
+          //   const newTrades = [tradeData, ...prev];
 
-            // Keep only the latest 15 trades
-            if (newTrades.length > 15) {
-              newTrades.pop();
-            }
+          //   // Keep only the latest 15 trades
+          //   if (newTrades.length > 15) {
+          //     newTrades.pop();
+          //   }
 
-            return newTrades;
-          });
+          //   return newTrades;
+          // });
         };
 
         wsConnection.current.onclose = () => {
@@ -82,15 +80,8 @@ export default function MarketTradePage(props: MarketTradePageProps) {
     <div className="w-full h-screen bg-gradient-to-br from-gray-100 to-gray-200">
       <div className="flex flex-col items-center justify-center h-full p-8">
         {/* Single Live Trades Display */}
-        {/* <TradesDisplay
-          marketData={marketData}
-          title={`${marketId} Live Trades`}
-          height="h-[500px]"
-          width="w-[600px]"
-          maxItems={15}
-          showVolume={true}
-          className="shadow-2xl"
-        /> */}
+          
+      
       </div>
     </div>
   );

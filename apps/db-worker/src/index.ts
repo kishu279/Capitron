@@ -1,4 +1,6 @@
+import { getStream } from "@repo/config";
 import { createClient } from "redis";
+import { insertTable, tradeDataType } from "./db/index.js";
 
 const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
 
@@ -15,41 +17,31 @@ async function main() {
   }
 }
 
+const stream: any[] = getStream();
+
 async function handleRedisMessage() {
+  let batchData: tradeDataType[] = [];
+
   try {
     console.log("Waiting for messages...");
 
-    let lastId: string = "$";
+    await client.subscribe(stream, async (message, channel) => {
+      // further operations on the messsage
+      // first save
+      // second extract on the basis of the time interval
+      // saving the record onthe table
+      // batch the stream data of 100
+      const parsedData = JSON.parse(message);
 
-    const messages = await client.xRead(
-      { id: lastId, key: "trades:binance" },
-      { BLOCK: 0 }
-    );
-
-    console.log("Message received:", messages);
-
-    // const response = await client.xGroupCreate(
-    //   "trades:binance",
-    //   "binance-group",
-    //   "$"
-    // );
-    // console.log(response); // >>> OK
-
-    // const messages = await client.xReadGroup(
-    //   "binance-group",
-    //   "sourave",
-    //   {
-    //     key: "trades:binance",
-    //     id: ">",
-    //   },
-    //   {
-    //     COUNT: 1,
-    //   }
-    // );
-
-    // console.log("Message received:", messages);
-
-    // console.log("Received messages:", messages);
+      if (batchData.length >= 0 && batchData.length < 100) {
+        batchData.push(parsedData);
+      } else {
+        batchData.push(parsedData);
+        await insertTable(batchData);
+        console.log("Batch data inserted successfully", batchData.length);
+        batchData = []; // clear
+      }
+    });
   } catch (error) {
     console.error("Error handling Redis message:", error);
   }

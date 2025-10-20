@@ -59,23 +59,8 @@ async function main() {
 
       // push the data to redis pub sub
       // ...
+
       await redisClient.publish(stream, JSON.stringify(trade));
-
-      // push the data to redis streams
-      // ...
-      // const response = await redisClient.xAdd(
-      //   "trades:binance",
-      //   "*",
-      //   { data: JSON.stringify(trade) }
-      //   //   {
-      //   //   rider: "Prickett",
-      //   //   speed: "29.7",
-      //   //   position: "2",
-      //   //   location_id: "1",
-      //   // }
-      // );
-
-      // console.log("Trade pushed to Redis Stream with ID:", response);
     };
 
     websocketClient.onclose = () => {

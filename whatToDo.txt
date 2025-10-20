@@ -1,0 +1,8 @@
+//  wHAT I CREATED
+1. created materalized view for candles getting the ohlc data
+2. querying the data from the materalized view
+
+
+// WHAT I NEED TO DO
+1. functionality to get the data from the materalized view as per user demand
+2. data poller to db worker saving trades is faulty

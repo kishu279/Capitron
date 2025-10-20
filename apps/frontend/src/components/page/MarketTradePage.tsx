@@ -33,8 +33,6 @@ export default function MarketTradePage(props: MarketTradePageProps) {
         wsConnection.current.onmessage = (event) => {
           const message = JSON.parse(event.data);
 
-          console.log(message);
-
           setMaretData((prev) => {
             // Transform the message to match TradeData interface
             const tradeData: TradeData = {

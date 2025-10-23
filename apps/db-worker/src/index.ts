@@ -1,16 +1,59 @@
 import { getStream } from "@repo/config";
 import { createClient } from "redis";
-import { insertTable, tradeDataType } from "./db/index.js";
+import { getCandles, insertTable, tradeDataType } from "./db/index.js";
+import { Queue, RedisOptions, Worker } from "bullmq";
 
 const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
 
 const client = createClient({ url: redisUrl });
+const connection: RedisOptions = {
+  host: "127.0.0.1",
+  port: 6379,
+};
+
+const queryQueue = new Queue("query-db", { connection });
+const worker = new Worker(
+  "query-db",
+  async (job) => {
+    const { time } = await job.data;
+    console.log(`Processing job for ${time} minute candles`);
+
+    const stream: any[] = ["BTCUSDT", "ETHUSDT", "BNBUSDT"]; // getStream();
+
+    for (let symbol of stream) {
+      const response = await getCandles(symbol, Number(time));
+
+      // push it to the respective clients
+    }
+  },
+  { connection }
+);
+
+(async () => {})();
 
 async function main() {
   try {
     await client.connect();
 
     handleRedisMessage();
+
+    await queryQueue.add(
+      "query-job-1min",
+      { time: 1 },
+      { repeat: { every: 1 * 60 * 1000 } }
+    );
+
+    await queryQueue.add(
+      "query-job-2min",
+      { time: 2 },
+      { repeat: { every: 2 * 60 * 1000 } }
+    );
+
+    await queryQueue.add(
+      "query-job-5min",
+      { time: 5 },
+      { repeat: { every: 5 * 60 * 1000 } }
+    );
     console.log("Connected to Redis");
   } catch (error) {
     console.error("Error connecting to Redis:", error);
@@ -38,7 +81,7 @@ async function handleRedisMessage() {
       } else {
         batchData.push(parsedData);
         await insertTable(batchData);
-        console.log("Batch data inserted successfully", batchData.length);
+        // console.log("Batch data inserted successfully", batchData.length);
         batchData = []; // clear
       }
     });

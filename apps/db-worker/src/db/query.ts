@@ -56,12 +56,40 @@ const createPolicy = `
   // for 1m 2m 5m done
 `;
 
-const queryCandles = `
-  SELECT * FROM candles_1m
-  WHERE symbol = $1 AND bucket >= now() - INTERVAL '1 hour'
-  ORDER BY bucket DESC
-  LIMIT 1;
-`;
+// const queryCandles = `
+//   SELECT * FROM candles_1m
+//   WHERE symbol = $1 AND bucket >= now() - INTERVAL '1 hour'
+//   ORDER BY bucket DESC
+//   LIMIT 1;
+// `;
+
+export async function getCandles(symbol: string, time: number) {
+  const pgClient = await client.connect();
+
+  if (!time) return;
+
+  // Use template string for table name safely (validate input!)
+  const tableName = `candles_${time}m`;
+
+  // console.log("Querying table:", tableName);
+
+  const queryCandles = `
+    SELECT * FROM ${tableName}
+    WHERE symbol = $1 AND bucket >= now() - INTERVAL '1 hour'
+    ORDER BY bucket DESC
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pgClient.query(queryCandles, [symbol]);
+    // console.log(`Result from ${tableName}:`, result.rows[0]);
+    return result.rows[0];
+  } catch (error) {
+    console.error(`Error querying ${tableName}:`, error);
+  } finally {
+    pgClient.release(); // ✅ don't forget this
+  }
+}
 
 export async function insertTable(tradeData: tradeDataType[]) {
   const pgClient = await client.connect();
@@ -102,8 +130,8 @@ export async function insertTable(tradeData: tradeDataType[]) {
     `;
 
     const result = await pgClient.query(query, values);
-    console.log("Result: ", result.rowCount);
-    console.log("Trade inserted successfully");
+    // console.log("Result: ", result.rowCount);
+    // console.log("Trade inserted successfully");
 
     pgClient.release();
   } catch (error) {

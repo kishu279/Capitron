@@ -54,6 +54,10 @@ const clientCandles = new Map<string, WebSocket[]>();
 //   }
 // }
 
+async function broadCastCandles() {
+  // get the candles streams subscribed by clients
+}
+
 async function broadcastMessage(message: string): Promise<void> {
   // console.log("Stream Name:", streamName);
   const streamName = JSON.parse(message).symbol;
@@ -75,23 +79,6 @@ async function broadcastMessage(message: string): Promise<void> {
       }
     });
   }
-
-  // clientWebsocket = clientWebsocket.filter((client) => {
-  //   if (client.conn.readyState !== WebSocket.OPEN) {
-  //     return false; // drop disconnected clients
-  //   }
-
-  //   if (
-  //     client.conn.readyState === WebSocket.OPEN &&
-  //     (client.stream.length === 0 || client.stream.includes(streamName)) // if not subscribed to any stream, send all
-  //   ) {
-  //     // send to all the clients who are subscribed to the stream
-  //     // console.log("Client Stream:", message);
-  //     client.conn.send(message);
-  //   }
-
-  //   return true;
-  // });
 }
 
 async function handleRedisMessages() {
@@ -133,6 +120,9 @@ async function main() {
     console.log(getStream());
     await handleRedisMessages();
     console.log("Connected to Redis");
+
+    // periodically broad cast the candles
+    
   } catch (error) {
     console.error(error);
   }
@@ -173,7 +163,7 @@ wss.on("connection", (ws) => {
     } else if (messageData.type === "subscribe") {
       // update the stream and candle
       let clientCandleToSubscribe = messageData.candle;
-      let clientStreamToSubscribe = messageData.stream;
+      let clientStreamToSubscribe = messageData.stream; // all the streams
 
       //   get the client
       let client = clientWebsocket.get(ws);
